@@ -35,17 +35,25 @@
         #test-button:hover {
             background-color: #218838;
         }
+
+        #test-time {
+            margin-top: 10px;
+            font-size: 1.2em;
+        }
     </style>
 </head>
 <body>
     <div id="countdown">Loading countdown...</div>
     <audio id="audio" src="my_eyes.mp3"></audio>
     <button id="test-button">Test Timing</button>
+    <div id="test-time"></div>
 
     <script>
         const countdownElement = document.getElementById('countdown');
+        const testTimeElement = document.getElementById('test-time');
         const audio = document.getElementById('audio');
         const targetTime = new Date("2025-01-01T00:00:00").getTime();
+        const beatDropTime = 172; // 2 minutes 52 seconds in seconds
 
         function updateCountdown() {
             const currentTime = new Date().getTime();
@@ -53,10 +61,9 @@
 
             if (difference <= 0) {
                 countdownElement.textContent = "HAPPY NEW YEAR!";
-                if (audio.currentTime !== 172) {
-                    audio.currentTime = 172; // 2m 52s in seconds
+                if (!audio.playing) {
+                    audio.play();
                 }
-                audio.play();
             } else {
                 const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
@@ -66,8 +73,17 @@
         }
 
         function testTiming() {
-            countdownElement.textContent = "HAPPY NEW YEAR! (Test Mode)";
-            audio.currentTime = 172; // 2m 52s in seconds
+            const currentTime = new Date().getTime();
+            const difference = targetTime - currentTime;
+            const beatDropOffset = (beatDropTime * 1000) - difference;
+
+            if (beatDropOffset >= 0) {
+                testTimeElement.textContent = `The beat drop will align at: ${new Date(targetTime - beatDropOffset).toLocaleTimeString()}`;
+            } else {
+                testTimeElement.textContent = "The beat drop time is in the past. Adjust the countdown time.";
+            }
+
+            audio.currentTime = 0; // Play the song from the beginning
             audio.play();
         }
 
