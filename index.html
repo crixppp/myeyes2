@@ -52,7 +52,7 @@
         const countdownElement = document.getElementById('countdown');
         const testTimeElement = document.getElementById('test-time');
         const audio = document.getElementById('audio');
-        const targetTime = new Date("2024-12-31T23:59:59Z").getTime(); // Midnight UTC on New Year's Eve
+        const targetTime = new Date("2024-12-31T23:59:59+11:00").getTime(); // Midnight Melbourne Time (AEDT)
         const beatDropTime = 172; // 2m 52s in seconds
 
         function updateCountdown() {
