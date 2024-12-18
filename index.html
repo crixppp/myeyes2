@@ -52,7 +52,7 @@
         const countdownElement = document.getElementById('countdown');
         const testTimeElement = document.getElementById('test-time');
         const audio = document.getElementById('audio');
-        const targetTime = new Date("2024-12-31T23:59:59").getTime(); // Midnight at New Year's Eve
+        const targetTime = new Date("2024-12-31T23:59:59").getTime(); // Midnight on New Year's Eve
         const beatDropTime = 172; // 2m 52s in seconds
 
         function updateCountdown() {
@@ -61,9 +61,8 @@
 
             if (difference <= 0) {
                 countdownElement.textContent = "HAPPY NEW YEAR!";
-                if (audio.currentTime === 0) {
-                    audio.play();
-                }
+                audio.currentTime = beatDropTime;
+                audio.play();
             } else {
                 const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
@@ -74,15 +73,22 @@
 
         function testTiming() {
             const currentTime = new Date().getTime();
-            const startOffset = (targetTime - currentTime) / 1000 - beatDropTime;
-            
-            if (startOffset > 0) {
-                testTimeElement.textContent = `To hit the beat drop at midnight, the song starts ${startOffset.toFixed(1)} seconds earlier.`;
+            const remainingTime = targetTime - currentTime;
+            const beatDropDelay = (beatDropTime * 1000); // Beat drop time in ms
+
+            // Calculate when the beat drop will occur relative to current countdown time
+            const beatDropTarget = new Date(currentTime + remainingTime - beatDropDelay);
+            const beatDropHours = Math.floor((remainingTime - beatDropDelay) / (1000 * 60 * 60));
+            const beatDropMinutes = Math.floor(((remainingTime - beatDropDelay) % (1000 * 60 * 60)) / (1000 * 60));
+            const beatDropSeconds = Math.floor(((remainingTime - beatDropDelay) % (1000 * 60)) / 1000);
+
+            if (remainingTime > beatDropDelay) {
+                testTimeElement.textContent = `The beat drop will align at ${beatDropHours}h ${beatDropMinutes}m ${beatDropSeconds}s remaining.`;
             } else {
-                testTimeElement.textContent = "Adjust your system clock or countdown setup for accurate testing.";
+                testTimeElement.textContent = "The song won't align. Start earlier to match the beat drop at midnight.";
             }
-            
-            audio.currentTime = 0; // Start from the beginning
+
+            audio.currentTime = 0; // Start song at the beginning
             audio.play();
         }
 
