@@ -52,7 +52,7 @@
         const countdownElement = document.getElementById('countdown');
         const testTimeElement = document.getElementById('test-time');
         const audio = document.getElementById('audio');
-        const targetTime = new Date("2024-12-31T23:59:59").getTime(); // Midnight on New Year's Eve
+        const targetTime = new Date("2024-12-31T23:59:59Z").getTime(); // Midnight UTC on New Year's Eve
         const beatDropTime = 172; // 2m 52s in seconds
 
         function updateCountdown() {
@@ -64,31 +64,32 @@
                 audio.currentTime = beatDropTime;
                 audio.play();
             } else {
-                const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-                countdownElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
+                const totalSeconds = Math.floor(difference / 1000);
+                const days = Math.floor(totalSeconds / (60 * 60 * 24));
+                const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60));
+                const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+                const seconds = totalSeconds % 60;
+                countdownElement.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
             }
         }
 
         function testTiming() {
             const currentTime = new Date().getTime();
-            const remainingTime = targetTime - currentTime;
-            const beatDropDelay = (beatDropTime * 1000); // Beat drop time in ms
+            const remainingTimeMs = targetTime - currentTime;
+            const startSongAtMs = remainingTimeMs - (beatDropTime * 1000);
 
-            // Calculate when the beat drop will occur relative to current countdown time
-            const beatDropTarget = new Date(currentTime + remainingTime - beatDropDelay);
-            const beatDropHours = Math.floor((remainingTime - beatDropDelay) / (1000 * 60 * 60));
-            const beatDropMinutes = Math.floor(((remainingTime - beatDropDelay) % (1000 * 60 * 60)) / (1000 * 60));
-            const beatDropSeconds = Math.floor(((remainingTime - beatDropDelay) % (1000 * 60)) / 1000);
-
-            if (remainingTime > beatDropDelay) {
-                testTimeElement.textContent = `The beat drop will align at ${beatDropHours}h ${beatDropMinutes}m ${beatDropSeconds}s remaining.`;
+            if (startSongAtMs > 0) {
+                const beatDropTimeRemaining = remainingTimeMs - (beatDropTime * 1000);
+                const hours = Math.floor(beatDropTimeRemaining / (1000 * 60 * 60));
+                const minutes = Math.floor((beatDropTimeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((beatDropTimeRemaining % (1000 * 60)) / 1000);
+                
+                testTimeElement.textContent = `The beat drop will align at ${hours}h ${minutes}m ${seconds}s remaining.`;
             } else {
-                testTimeElement.textContent = "The song won't align. Start earlier to match the beat drop at midnight.";
+                testTimeElement.textContent = "Timing error: The song would have already started.";
             }
 
-            audio.currentTime = 0; // Start song at the beginning
+            audio.currentTime = 0; // Start from the beginning for testing
             audio.play();
         }
 
