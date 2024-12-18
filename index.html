@@ -22,8 +22,8 @@
             margin-bottom: 20px;
         }
 
-        #test-button {
-            margin-top: 20px;
+        button {
+            margin: 10px;
             padding: 10px 20px;
             background-color: #28a745;
             color: #fff;
@@ -32,7 +32,7 @@
             font-size: 1em;
         }
 
-        #test-button:hover {
+        button:hover {
             background-color: #218838;
         }
 
@@ -45,7 +45,11 @@
 <body>
     <div id="countdown">Loading countdown...</div>
     <audio id="audio" src="my_eyes.mp3"></audio>
-    <button id="test-button">Test Timing</button>
+    <div>
+        <button id="test-button">Test Timing</button>
+        <button id="prime-button">Activate New Year</button>
+        <button id="hide-button">Hide Buttons</button>
+    </div>
     <div id="test-time"></div>
 
     <script>
@@ -54,10 +58,18 @@
         const audio = document.getElementById('audio');
         const targetTime = new Date("2024-12-31T23:59:59+11:00").getTime(); // Midnight Melbourne Time (AEDT)
         const beatDropTime = 172; // 2m 52s in seconds
+        let primed = false;
 
         function updateCountdown() {
             const currentTime = new Date().getTime();
             const difference = targetTime - currentTime;
+
+            if (primed && difference <= 171000) { // 11:57:08 PM --> 171000ms before midnight
+                audio.currentTime = 0;
+                audio.play();
+                primed = false;
+                document.getElementById('prime-button').textContent = "New Year Activated!";
+            }
 
             if (difference <= 0) {
                 countdownElement.textContent = "HAPPY NEW YEAR!";
@@ -94,7 +106,18 @@
             audio.play();
         }
 
+        function primeNewYear() {
+            primed = true;
+            document.getElementById('prime-button').textContent = "Primed for 11:57:08 PM";
+        }
+
+        function hideButtons() {
+            document.querySelectorAll('button').forEach(button => button.style.display = 'none');
+        }
+
         document.getElementById('test-button').addEventListener('click', testTiming);
+        document.getElementById('prime-button').addEventListener('click', primeNewYear);
+        document.getElementById('hide-button').addEventListener('click', hideButtons);
 
         setInterval(updateCountdown, 1000);
     </script>
