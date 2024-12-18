@@ -52,8 +52,8 @@
         const countdownElement = document.getElementById('countdown');
         const testTimeElement = document.getElementById('test-time');
         const audio = document.getElementById('audio');
-        const targetTime = new Date("2025-01-01T00:00:00").getTime();
-        const beatDropTime = 172; // 2 minutes 52 seconds in seconds
+        const targetTime = new Date("2024-12-31T23:59:59").getTime(); // Midnight at New Year's Eve
+        const beatDropTime = 172; // 2m 52s in seconds
 
         function updateCountdown() {
             const currentTime = new Date().getTime();
@@ -61,7 +61,7 @@
 
             if (difference <= 0) {
                 countdownElement.textContent = "HAPPY NEW YEAR!";
-                if (!audio.playing) {
+                if (audio.currentTime === 0) {
                     audio.play();
                 }
             } else {
@@ -74,16 +74,15 @@
 
         function testTiming() {
             const currentTime = new Date().getTime();
-            const difference = targetTime - currentTime;
-            const beatDropOffset = (beatDropTime * 1000) - difference;
-
-            if (beatDropOffset >= 0) {
-                testTimeElement.textContent = `The beat drop will align at: ${new Date(targetTime - beatDropOffset).toLocaleTimeString()}`;
+            const startOffset = (targetTime - currentTime) / 1000 - beatDropTime;
+            
+            if (startOffset > 0) {
+                testTimeElement.textContent = `To hit the beat drop at midnight, the song starts ${startOffset.toFixed(1)} seconds earlier.`;
             } else {
-                testTimeElement.textContent = "The beat drop time is in the past. Adjust the countdown time.";
+                testTimeElement.textContent = "Adjust your system clock or countdown setup for accurate testing.";
             }
-
-            audio.currentTime = 0; // Play the song from the beginning
+            
+            audio.currentTime = 0; // Start from the beginning
             audio.play();
         }
 
