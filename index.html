@@ -48,6 +48,7 @@
     <div>
         <button id="test-button">Test Timing</button>
         <button id="prime-button">Activate New Year</button>
+        <button id="set-midnight-button">Set for Midnight</button>
         <button id="hide-button">Hide Buttons</button>
     </div>
     <div id="test-time"></div>
@@ -59,9 +60,22 @@
         const targetTime = new Date("2024-12-31T23:59:59+11:00").getTime(); // Midnight Melbourne Time (AEDT)
         const beatDropTime = 172; // 2m 52s in seconds
         let primed = false;
+        let setMidnight = false;
+        let nearestMidnight = null;
 
         function updateCountdown() {
             const currentTime = new Date().getTime();
+
+            if (setMidnight && nearestMidnight !== null) {
+                const difference = nearestMidnight - currentTime;
+
+                if (difference <= beatDropTime * 1000) {
+                    audio.currentTime = 0;
+                    audio.play();
+                    setMidnight = false;
+                }
+            }
+
             const difference = targetTime - currentTime;
 
             if (primed && difference <= 171000) { // 11:57:08 PM --> 171000ms before midnight
@@ -111,12 +125,21 @@
             document.getElementById('prime-button').textContent = "Primed for 11:57:08 PM";
         }
 
+        function setForMidnight() {
+            const now = new Date();
+            nearestMidnight = new Date(now);
+            nearestMidnight.setHours(24, 0, 0, 0); // Set to the nearest midnight
+            setMidnight = true;
+            document.getElementById('set-midnight-button').textContent = "Aligned with Midnight";
+        }
+
         function hideButtons() {
             document.querySelectorAll('button').forEach(button => button.style.display = 'none');
         }
 
         document.getElementById('test-button').addEventListener('click', testTiming);
         document.getElementById('prime-button').addEventListener('click', primeNewYear);
+        document.getElementById('set-midnight-button').addEventListener('click', setForMidnight);
         document.getElementById('hide-button').addEventListener('click', hideButtons);
 
         setInterval(updateCountdown, 1000);
